@@ -1,0 +1,21 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f3f6fa;
+  color: #183044;
+  font-family: Arial, sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+button:focus-visible {
+  outline: 3px solid #e7aa35;
+  outline-offset: 4px;
+}
