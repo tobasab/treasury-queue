@@ -1,45 +1,65 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { createServer } from "node:http";
+import { Server } from "socket.io";
+
 import pool from "./db.js";
 import ticketRoutes from "./routes/tickets.js";
 import tellerRoutes from "./routes/teller.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import displayRoutes from "./routes/display.js";
-import { createServer } from "node:http";
-import { Server } from "socket.io";
-
 
 dotenv.config();
 
+// Configuration
+const PORT = Number(process.env.PORT) || 3000;
+const CLIENT_ORIGIN =
+  process.env.CLIENT_ORIGIN || "http://localhost:5173";
+
+const currentDirectory = path.dirname(
+  fileURLToPath(import.meta.url)
+);
+
+const clientBuildDirectory = path.resolve(
+  currentDirectory,
+  "../client/dist"
+);
+
+// Express and HTTP server
 const app = express();
 const httpServer = createServer(app);
 
+// Socket.IO uses the same HTTP server as Express.
 const io = new Server(httpServer, {
   cors: {
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: CLIENT_ORIGIN,
     methods: ["GET", "POST"],
   },
 });
 
 app.set("io", io);
-const PORT = Number(process.env.PORT) || 3000;
 
+// Middleware
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || "http://localhost:5173",
+    origin: CLIENT_ORIGIN,
   })
 );
 
-app.use(express.json());
+app.use(express.json({ limit: "100kb" }));
+
+// Application routes
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/teller", tellerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/display", displayRoutes);
 
-// Check whether the backend is running.
+// Application health
 app.get("/api/health", (req, res) => {
   res.json({
     success: true,
@@ -47,26 +67,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// Temporary service list. We will move this into MariaDB next.
-// app.get("/api/services", (req, res) => {
-//   res.json([
-//     {
-//       id: 1,
-//       name: "RPT Collections",
-//       prefix: "RPT",
-//     },
-//     {
-//       id: 2,
-//       name: "General Collections",
-//       prefix: "GEN",
-//     },
-//     {
-//       id: 3,
-//       name: "Certificates",
-//       prefix: "CERT",
-//     },
-//   ]);
-// });
+// Database connection test
 app.get("/api/db-test", async (req, res) => {
   try {
     const rows = await pool.query(
@@ -79,7 +80,10 @@ app.get("/api/db-test", async (req, res) => {
       database: rows[0].database_name,
     });
   } catch (error) {
-    console.error("Database connection failed:", error.code);
+    console.error(
+      "Database connection failed:",
+      error.code || error.message
+    );
 
     res.status(503).json({
       success: false,
@@ -88,6 +92,7 @@ app.get("/api/db-test", async (req, res) => {
   }
 });
 
+// Active services
 app.get("/api/services", async (req, res) => {
   try {
     const services = await pool.query(`
@@ -99,13 +104,18 @@ app.get("/api/services", async (req, res) => {
 
     res.json(services);
   } catch (error) {
-    console.error("Failed to load services:", error.code);
+    console.error(
+      "Failed to load services:",
+      error.code || error.message
+    );
 
     res.status(500).json({
       message: "Unable to load services",
     });
   }
 });
+
+// Counters
 app.get("/api/counters", async (req, res) => {
   try {
     const counters = await pool.query(`
@@ -116,13 +126,66 @@ app.get("/api/counters", async (req, res) => {
 
     res.json(counters);
   } catch (error) {
-    console.error("Failed to load counters:", error.code);
+    console.error(
+      "Failed to load counters:",
+      error.code || error.message
+    );
 
     res.status(500).json({
       message: "Unable to load counters",
     });
   }
 });
-httpServer.listen(PORT, () => {
-  console.log(`Treasury API: http://localhost:${PORT}`);
+
+// Unknown API endpoints return JSON.
+app.use("/api", (req, res) => {
+  res.status(404).json({
+    message: "API endpoint not found",
+  });
+});
+
+// Serve the React production build.
+// Docker must place the build in /app/client/dist
+// when this file is located at /app/server/index.js.
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(clientBuildDirectory));
+
+  // Express 5 requires a named wildcard.
+  app.get("/{*path}", (req, res) => {
+    res.sendFile(
+      path.join(clientBuildDirectory, "index.html")
+    );
+  });
+}
+
+// Central error handler
+app.use((error, req, res, next) => {
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  console.error(
+    "Request error:",
+    error.code || error.message
+  );
+
+  const status =
+    Number.isInteger(error.status) &&
+    error.status >= 400 &&
+    error.status < 600
+      ? error.status
+      : 500;
+
+  res.status(status).json({
+    success: false,
+    message:
+      status === 400
+        ? "Invalid request"
+        : "Unable to process the request",
+  });
+});
+
+// Start Express and Socket.IO together.
+httpServer.listen(PORT, "0.0.0.0", () => {
+  console.log(`Treasury server listening on port ${PORT}`);
 });

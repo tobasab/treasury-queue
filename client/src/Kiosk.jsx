@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 
-const API = "http://localhost:3000/api";
+const API = "/api";
 const STORAGE_KEY = "treasury-pending-ticket";
 
 function readPendingRequest() {
@@ -21,6 +21,24 @@ function readPendingRequest() {
   } catch {
     return null;
   }
+}
+function createRequestId() {
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+  const hex = Array.from(bytes, (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    hex.slice(12, 16),
+    hex.slice(16, 20),
+    hex.slice(20),
+  ].join("-");
 }
 
 export default function Kiosk() {
@@ -87,7 +105,7 @@ export default function Kiosk() {
       const request = pending || {
         service_id: service.id,
         service_name: service.name,
-        request_id: crypto.randomUUID(),
+        request_id: createRequestId(),
       };
 
       // Store the request before sending it.

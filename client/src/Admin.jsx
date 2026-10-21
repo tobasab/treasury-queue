@@ -1,7 +1,7 @@
 import CounterServices from "./CounterServices";
 import { useEffect, useRef, useState } from "react";
 
-const API = "http://localhost:3000/api";
+const API = "/api";
 
 export default function Admin({ session, onLogout }) {
     const [tellers, setTellers] = useState([]);

@@ -7,7 +7,7 @@ import Teller from "./Teller";
 import "./App.css";
 
 const SESSION_KEY = "treasury-session";
-const API = "http://localhost:3000/api";
+const API = "/api";
 
 function readSession() {
     try {

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-const API = "http://localhost:3000/api";
+const API = "/api";
 
 export default function CounterServices({ session, onLogout }) {
     const [counters, setCounters] = useState([]);

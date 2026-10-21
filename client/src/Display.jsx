@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 
-const SERVER = "http://localhost:3000";
+const SERVER = window.location.origin;
 
 export default function Display() {
     const [queue, setQueue] = useState({
