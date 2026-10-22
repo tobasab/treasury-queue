@@ -1,0 +1,440 @@
+.treasury-admin {
+  --ta-ink: #183247;
+  --ta-muted: #607386;
+  --ta-border: #e1e8ef;
+  --ta-teal: #14786f;
+
+  box-sizing: border-box;
+  width: min(1200px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+  color: var(--ta-ink);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.treasury-admin *,
+.treasury-admin *::before,
+.treasury-admin *::after {
+  box-sizing: border-box;
+}
+
+.treasury-admin [hidden] {
+  display: none !important;
+}
+
+.treasury-admin .ta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+
+.treasury-admin .ta-eyebrow {
+  margin: 0 0 8px;
+  color: var(--ta-teal);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.treasury-admin h1 {
+  margin: 0;
+  font-size: clamp(25px, 3vw, 34px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.treasury-admin .ta-subtitle {
+  margin: 10px 0 0;
+  color: var(--ta-muted);
+}
+
+.treasury-admin .ta-account {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.treasury-admin .ta-account strong,
+.treasury-admin .ta-account span {
+  display: block;
+}
+
+.treasury-admin .ta-account strong {
+  font-size: 14px;
+}
+
+.treasury-admin .ta-account span {
+  margin-top: 3px;
+  color: var(--ta-muted);
+  font-size: 12px;
+}
+
+.treasury-admin .ta-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.treasury-admin .ta-stat {
+  padding: 22px;
+  border: 1px solid var(--ta-border);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.treasury-admin .ta-stat span,
+.treasury-admin .ta-stat strong,
+.treasury-admin .ta-stat small {
+  display: block;
+}
+
+.treasury-admin .ta-stat span {
+  color: var(--ta-muted);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.treasury-admin .ta-stat strong {
+  margin: 8px 0 4px;
+  font-size: 34px;
+  line-height: 1.2;
+}
+
+.treasury-admin .ta-stat small {
+  color: var(--ta-muted);
+  font-size: 12px;
+}
+
+.treasury-admin .ta-stat-active {
+  border-top: 3px solid #168477;
+}
+
+.treasury-admin .ta-stat-active strong {
+  color: #14786f;
+}
+
+.treasury-admin .ta-stat-pending {
+  border-top: 3px solid #d6a33a;
+}
+
+.treasury-admin .ta-stat-pending strong {
+  color: #94651c;
+}
+
+.treasury-admin .ta-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 5px;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid var(--ta-border);
+  border-radius: 12px;
+  background: #eaf0f5;
+}
+
+.treasury-admin .ta-tabs button {
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ta-muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.treasury-admin .ta-tabs button.is-selected {
+  background: #fff;
+  color: var(--ta-ink);
+  box-shadow: 0 2px 5px rgb(24 50 71 / 8%);
+}
+
+.treasury-admin .ta-panel {
+  overflow: hidden;
+  border: 1px solid var(--ta-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 24px rgb(24 50 71 / 3%);
+}
+
+.treasury-admin .ta-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+
+.treasury-admin .ta-panel-heading h2 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.treasury-admin .ta-panel-heading p {
+  margin: 5px 0 0;
+  color: var(--ta-muted);
+  font-size: 13px;
+}
+
+.treasury-admin .ta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 9px 14px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.4;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.treasury-admin .ta-button-primary {
+  background: var(--ta-teal);
+  color: #fff;
+}
+
+.treasury-admin .ta-button-primary:hover:not(:disabled) {
+  background: #0e625b;
+}
+
+.treasury-admin .ta-button-secondary {
+  border-color: var(--ta-border);
+  background: #fff;
+  color: var(--ta-ink);
+}
+
+.treasury-admin .ta-button-secondary:hover:not(:disabled) {
+  background: #f2f6f9;
+}
+
+.treasury-admin .ta-button-danger {
+  background: #fff1f1;
+  color: #ad3434;
+}
+
+.treasury-admin .ta-button-danger:hover:not(:disabled) {
+  background: #ffe4e4;
+}
+
+.treasury-admin button:disabled,
+.treasury-admin select:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.treasury-admin button:focus-visible,
+.treasury-admin select:focus-visible {
+  outline: 3px solid #7bd1c6;
+  outline-offset: 3px;
+}
+
+.treasury-admin .ta-table-scroll {
+  overflow-x: auto;
+}
+
+.treasury-admin .ta-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.treasury-admin .ta-table th {
+  padding: 14px 24px;
+  border-top: 1px solid var(--ta-border);
+  border-bottom: 1px solid var(--ta-border);
+  background: #f7f9fb;
+  color: var(--ta-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.treasury-admin .ta-table td {
+  padding: 20px 24px;
+  border-bottom: 1px solid #edf1f5;
+  vertical-align: middle;
+}
+
+.treasury-admin .ta-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.treasury-admin .ta-table tbody tr:hover {
+  background: #fbfcfd;
+}
+
+.treasury-admin .ta-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 180px;
+}
+
+.treasury-admin .ta-avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #e8f4f2;
+  color: var(--ta-teal);
+  font-weight: 750;
+}
+
+.treasury-admin .ta-person strong {
+  display: block;
+  font-size: 14px;
+}
+
+.treasury-admin .ta-person small {
+  display: block;
+  margin-top: 3px;
+  color: var(--ta-muted);
+  font-size: 12px;
+}
+
+.treasury-admin .ta-status {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+
+.treasury-admin .ta-status-active {
+  background: #e5f5ee;
+  color: #176b49;
+}
+
+.treasury-admin .ta-status-pending {
+  background: #fff4d9;
+  color: #8b6218;
+}
+
+.treasury-admin .ta-status-disabled {
+  background: #f0f2f5;
+  color: #626d7c;
+}
+
+.treasury-admin .ta-select {
+  min-width: 165px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #ced9e3;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ta-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.treasury-admin .ta-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.treasury-admin .ta-notice {
+  margin: 0 24px 20px;
+  padding: 13px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+}
+
+.treasury-admin .ta-notice-error {
+  background: #fff0f0;
+  color: #a02e2e;
+}
+
+.treasury-admin .ta-notice-success {
+  background: #e8f6ef;
+  color: #176b49;
+}
+
+.treasury-admin .ta-empty {
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--ta-muted);
+}
+
+.treasury-admin .ta-empty h3 {
+  margin: 0 0 8px;
+  color: var(--ta-ink);
+}
+
+.treasury-admin .ta-services {
+  padding: 24px;
+}
+
+@media (max-width: 900px) {
+  .treasury-admin .ta-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .treasury-admin .ta-account {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .treasury-admin .ta-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  .treasury-admin {
+    width: calc(100% - 24px);
+    padding-top: 24px;
+  }
+
+  .treasury-admin .ta-stats {
+    gap: 10px;
+  }
+
+  .treasury-admin .ta-stat {
+    padding: 16px;
+  }
+
+  .treasury-admin .ta-stat strong {
+    font-size: 28px;
+  }
+
+  .treasury-admin .ta-tabs {
+    width: 100%;
+  }
+
+  .treasury-admin .ta-tabs button {
+    flex: 1;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .treasury-admin .ta-panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .treasury-admin .ta-services {
+    padding: 16px;
+  }
+}

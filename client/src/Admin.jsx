@@ -1,29 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import CounterServices from "./CounterServices";
-import PasswordForm from "./PasswordForm";
+import "./Admin.css";
 
 const API = "/api";
 
 export default function Admin({ session, onLogout }) {
+  const [tab, setTab] = useState("tellers");
   const [tellers, setTellers] = useState([]);
   const [counters, setCounters] = useState([]);
   const [assignments, setAssignments] = useState({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [passwordBusy, setPasswordBusy] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [resetTeller, setResetTeller] = useState(null);
 
   const saving = useRef(false);
-  const passwordRunning = useRef(false);
-
-  const controlsDisabled = loading || busy || passwordBusy;
-
-  function handlePasswordBusy(value) {
-    passwordRunning.current = value;
-    setPasswordBusy(value);
-  }
 
   const request = useCallback(
     async (path, options = {}) => {
@@ -38,10 +29,7 @@ export default function Admin({ session, onLogout }) {
 
       if (response.status === 401 || response.status === 403) {
         onLogout();
-
-        throw new Error(
-          "Please sign in with an active administrator account."
-        );
+        throw new Error("Please sign in with an administrator account.");
       }
 
       const data = await response.json();
@@ -65,9 +53,7 @@ export default function Admin({ session, onLogout }) {
       if (signal?.aborted) return;
 
       setTellers(users);
-      setCounters(
-        counterList.filter((counter) => counter.is_active)
-      );
+      setCounters(counterList.filter((counter) => counter.is_active));
 
       const selected = {};
 
@@ -108,13 +94,7 @@ export default function Admin({ session, onLogout }) {
   }, [loadData]);
 
   async function refreshData() {
-    if (
-      saving.current ||
-      passwordRunning.current ||
-      loading
-    ) {
-      return;
-    }
+    if (saving.current || loading) return;
 
     saving.current = true;
     setLoading(true);
@@ -132,17 +112,7 @@ export default function Admin({ session, onLogout }) {
   }
 
   async function updateTeller(user, action) {
-    if (
-      saving.current ||
-      passwordRunning.current ||
-      loading
-    ) {
-      return;
-    }
-
-    if (!["assignment", "disable"].includes(action)) {
-      return;
-    }
+    if (saving.current || loading) return;
 
     const counterId = Number(assignments[user.id]);
 
@@ -180,7 +150,7 @@ export default function Admin({ session, onLogout }) {
         }
       );
 
-      setMessage(data.message || "Teller account updated.");
+      setMessage(data.message || "Account updated successfully.");
 
       try {
         await loadData();
@@ -197,211 +167,251 @@ export default function Admin({ session, onLogout }) {
     }
   }
 
-  function openPasswordReset(user) {
-    if (
-      saving.current ||
-      passwordRunning.current ||
-      loading
-    ) {
-      return;
-    }
+  const disabled = loading || busy;
 
-    setResetTeller(user);
-    setError("");
-    setMessage("");
+  const totals = {
+    active: tellers.filter((user) => user.status === "active").length,
+    pending: tellers.filter((user) => user.status === "pending").length,
+    disabled: tellers.filter((user) => user.status === "disabled").length,
+  };
+
+  function summaryValue(value) {
+    return loading ? "…" : value;
   }
 
   return (
-    <main className="kiosk admin-page">
-      <header className="page-header">
-        <span className="office-label">
-          CITY TREASURY OFFICE
-        </span>
-        <h1>Teller account management</h1>
-        <p>
-          Approve registrations, assign counters, and manage passwords.
-        </p>
-      </header>
+    <main className="treasury-admin">
+      <header className="ta-header">
+        <div>
+          <p className="ta-eyebrow">CITY TREASURY OFFICE</p>
+          <h1>Queue administration</h1>
+          <p className="ta-subtitle">
+            Manage your team and counter assignments.
+          </p>
+        </div>
 
-      <div className="admin-toolbar">
-        <span>Signed in as {session.user.full_name}</span>
-
-        <div className="ticket-actions">
-          <button
-            type="button"
-            disabled={controlsDisabled}
-            onClick={refreshData}
-          >
-            Refresh
-          </button>
+        <div className="ta-account">
+          <div>
+            <strong>{session.user.full_name}</strong>
+            <span>Administrator</span>
+          </div>
 
           <button
             type="button"
-            className="secondary-button"
-            disabled={controlsDisabled}
+            className="ta-button ta-button-secondary"
+            disabled={disabled}
             onClick={onLogout}
           >
             Sign out
           </button>
         </div>
-      </div>
+      </header>
 
-      {error && (
-        <div className="error-message" role="alert">
-          {error}
+      <section className="ta-stats" aria-label="Account summary">
+        <article className="ta-stat">
+          <span>Total tellers</span>
+          <strong>{summaryValue(tellers.length)}</strong>
+          <small>Registered accounts</small>
+        </article>
+
+        <article className="ta-stat ta-stat-active">
+          <span>Active</span>
+          <strong>{summaryValue(totals.active)}</strong>
+          <small>Approved accounts</small>
+        </article>
+
+        <article className="ta-stat ta-stat-pending">
+          <span>Pending approval</span>
+          <strong>{summaryValue(totals.pending)}</strong>
+          <small>Awaiting administrator review</small>
+        </article>
+
+        <article className="ta-stat">
+          <span>Disabled</span>
+          <strong>{summaryValue(totals.disabled)}</strong>
+          <small>Access suspended</small>
+        </article>
+      </section>
+
+      <nav className="ta-tabs" aria-label="Administration sections">
+        <button
+          type="button"
+          className={tab === "tellers" ? "is-selected" : ""}
+          aria-pressed={tab === "tellers"}
+          disabled={busy}
+          onClick={() => setTab("tellers")}
+        >
+          Teller accounts
+        </button>
+
+        <button
+          type="button"
+          className={tab === "services" ? "is-selected" : ""}
+          aria-pressed={tab === "services"}
+          disabled={busy}
+          onClick={() => setTab("services")}
+        >
+          Counter services
+        </button>
+      </nav>
+
+      <section className="ta-panel" hidden={tab !== "tellers"}>
+        <div className="ta-panel-heading">
+          <div>
+            <h2>Teller accounts</h2>
+            <p>Approve access and choose each teller’s counter.</p>
+          </div>
+
+          <button
+            type="button"
+            className="ta-button ta-button-secondary"
+            disabled={disabled}
+            onClick={refreshData}
+          >
+            {loading ? "Loading…" : "Refresh list"}
+          </button>
         </div>
-      )}
 
-      {message && (
-        <div className="success-message" role="status">
-          {message}
-        </div>
-      )}
+        {error && (
+          <div className="ta-notice ta-notice-error" role="alert">
+            {error}
+          </div>
+        )}
 
-      {loading ? (
-        <p>Loading teller accounts…</p>
-      ) : tellers.length === 0 ? (
-        <section className="ticket-panel">
-          <h2>
-            {error
-              ? "Teller accounts unavailable"
-              : "No teller registrations yet"}
-          </h2>
-          <p>
-            {error
-              ? "Click Refresh to try loading the accounts again."
-              : "Registered tellers will appear here for approval."}
-          </p>
-        </section>
-      ) : (
-        <div className="admin-table-wrap">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Teller</th>
-                <th>Status</th>
-                <th>Assigned counter</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+        {message && (
+          <div className="ta-notice ta-notice-success" role="status">
+            {message}
+          </div>
+        )}
 
-            <tbody>
-              {tellers.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <strong>{user.full_name}</strong>
-                    <small className="username-label">
-                      {user.username}
-                    </small>
-                  </td>
-
-                  <td>
-                    <span
-                      className={`account-status ${user.status}`}
-                    >
-                      {user.status}
-                    </span>
-                  </td>
-
-                  <td>
-                    <select
-                      className="assignment-select"
-                      aria-label={`Counter for ${user.full_name}`}
-                      value={assignments[user.id] || ""}
-                      disabled={controlsDisabled}
-                      onChange={(event) =>
-                        setAssignments((current) => ({
-                          ...current,
-                          [user.id]: event.target.value,
-                        }))
-                      }
-                    >
-                      <option value="">Select counter</option>
-
-                      {counters.map((counter) => (
-                        <option
-                          key={counter.id}
-                          value={counter.id}
-                        >
-                          {counter.name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-
-                  <td>
-                    <div className="ticket-actions row-actions">
-                      <button
-                        type="button"
-                        disabled={
-                          controlsDisabled ||
-                          !assignments[user.id]
-                        }
-                        onClick={() =>
-                          updateTeller(user, "assignment")
-                        }
-                      >
-                        {user.status === "pending"
-                          ? "Approve"
-                          : user.status === "disabled"
-                            ? "Enable"
-                            : "Save assignment"}
-                      </button>
-
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        disabled={
-                          controlsDisabled ||
-                          user.status === "disabled"
-                        }
-                        onClick={() =>
-                          updateTeller(user, "disable")
-                        }
-                      >
-                        Disable
-                      </button>
-
-                      <button
-                        type="button"
-                        className="secondary-button"
-                        disabled={controlsDisabled}
-                        onClick={() => openPasswordReset(user)}
-                      >
-                        Reset password
-                      </button>
-                    </div>
-                  </td>
+        {loading ? (
+          <div className="ta-empty">Loading teller accounts…</div>
+        ) : tellers.length === 0 ? (
+          <div className="ta-empty">
+            <h3>
+              {error ? "Unable to load accounts" : "No teller accounts yet"}
+            </h3>
+            <p>
+              {error
+                ? "Use Refresh list to try again."
+                : "New registrations will appear here for approval."}
+            </p>
+          </div>
+        ) : (
+          <div className="ta-table-scroll">
+            <table className="ta-table">
+              <thead>
+                <tr>
+                  <th scope="col">Teller</th>
+                  <th scope="col">Account status</th>
+                  <th scope="col">Counter assignment</th>
+                  <th scope="col">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
 
-      {resetTeller && (
-        <PasswordForm
-          key={resetTeller.id}
-          session={session}
-          onLogout={onLogout}
-          teller={resetTeller}
-          disabled={controlsDisabled}
-          onBusyChange={handlePasswordBusy}
-          onCancel={() => setResetTeller(null)}
-        />
-      )}
+              <tbody>
+                {tellers.map((user) => (
+                  <tr key={user.id}>
+                    <td>
+                      <div className="ta-person">
+                        <span className="ta-avatar" aria-hidden="true">
+                          {user.full_name?.trim().charAt(0).toUpperCase() || "T"}
+                        </span>
 
-      <PasswordForm
-        session={session}
-        onLogout={onLogout}
-        disabled={controlsDisabled}
-        onBusyChange={handlePasswordBusy}
-      />
+                        <div>
+                          <strong>{user.full_name}</strong>
+                          <small>@{user.username}</small>
+                        </div>
+                      </div>
+                    </td>
 
-      <CounterServices
-        session={session}
-        onLogout={onLogout}
-      />
+                    <td>
+                      <span className={`ta-status ta-status-${user.status}`}>
+                        {user.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      <select
+                        className="ta-select"
+                        aria-label={`Counter for ${user.full_name}`}
+                        value={assignments[user.id] || ""}
+                        disabled={disabled}
+                        onChange={(event) =>
+                          setAssignments((current) => ({
+                            ...current,
+                            [user.id]: event.target.value,
+                          }))
+                        }
+                      >
+                        <option value="">Select counter</option>
+
+                        {user.counter_id &&
+                          !counters.some(
+                            (counter) =>
+                              Number(counter.id) === Number(user.counter_id)
+                          ) && (
+                            <option value={user.counter_id} disabled>
+                              {user.counter_name || "Assigned counter"} (inactive)
+                            </option>
+                          )}
+
+                        {counters.map((counter) => (
+                          <option key={counter.id} value={counter.id}>
+                            {counter.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    <td>
+                      <div className="ta-row-actions">
+                        <button
+                          type="button"
+                          className="ta-button ta-button-primary"
+                          disabled={
+                            disabled ||
+                            !counters.some(
+                              (counter) =>
+                                Number(counter.id) ===
+                                Number(assignments[user.id])
+                            )
+                          }
+                          onClick={() => updateTeller(user, "assignment")}
+                        >
+                          {user.status === "pending"
+                            ? "Approve"
+                            : user.status === "disabled"
+                              ? "Enable account"
+                              : "Save assignment"}
+                        </button>
+
+                        {user.status !== "disabled" && (
+                          <button
+                            type="button"
+                            className="ta-button ta-button-danger"
+                            disabled={disabled}
+                            onClick={() => updateTeller(user, "disable")}
+                          >
+                            Disable
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section
+        className="ta-panel ta-services"
+        hidden={tab !== "services"}
+      >
+        <CounterServices session={session} onLogout={onLogout} />
+      </section>
     </main>
   );
 }
