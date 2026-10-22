@@ -62,14 +62,15 @@ router.post("/register", registrationLimit, async (req, res) => {
     });
   }
 
-  if (
-    password.length < 4 ||
-    Buffer.byteLength(password, "utf8") > 72
-  ) {
-    return res.status(400).json({
-      message: "Password must contain at least 4 characters and at most 72 bytes.",
-    });
-  }
+if (
+  password.length < 6 ||
+  Buffer.byteLength(password, "utf8") > 72
+) {
+  return res.status(400).json({
+    message:
+      "Password must contain at least 6 characters and at most 72 bytes.",
+  });
+}
 
   try {
     const passwordHash = await bcrypt.hash(password, 12);
@@ -169,7 +170,7 @@ router.post("/login", loginLimit, async (req, res) => {
 
     res.json({
       success: true,
-      token: createToken(user.id),
+      token: createToken(user.id, user.token_version),
       user: {
         id: user.id,
         full_name: user.full_name,

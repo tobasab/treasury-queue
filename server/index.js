@@ -12,6 +12,7 @@ import tellerRoutes from "./routes/teller.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import displayRoutes from "./routes/display.js";
+import passwordRoutes from "./routes/passwords.js";
 
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use("/api/teller", tellerRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/display", displayRoutes);
+app.use("/api/passwords", passwordRoutes);
 
 // Application health
 app.get("/api/health", (req, res) => {

@@ -573,3 +573,39 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 }
+.password-panel {
+  margin-top: 24px;
+}
+
+.password-form {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+  margin: 20px auto 0;
+  text-align: left;
+}
+
+.password-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.password-form input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.password-form input:focus {
+  outline: 2px solid #217b72;
+  outline-offset: 2px;
+}
+
+.password-form input:disabled {
+  background: #f1f5f9;
+}

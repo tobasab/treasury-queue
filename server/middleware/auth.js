@@ -7,11 +7,17 @@ dotenv.config();
 const secret = process.env.JWT_SECRET;
 
 if (!secret || secret.length < 32) {
-  throw new Error("Set JWT_SECRET in server/.env to at least 32 characters.");
+  throw new Error("Set JWT_SECRET to at least 32 characters.");
 }
 
-export function createToken(userId) {
-  return jwt.sign({}, secret, {
+export function createToken(userId, tokenVersion) {
+  const version = Number(tokenVersion);
+
+  if (!Number.isSafeInteger(version) || version < 0) {
+    throw new Error("Invalid token version.");
+  }
+
+  return jwt.sign({ version }, secret, {
     subject: String(userId),
     algorithm: "HS256",
     expiresIn: "8h",
@@ -34,8 +40,15 @@ export async function requireAuth(req, res, next) {
       algorithms: ["HS256"],
     });
 
-    if (!/^\d+$/.test(payload.sub)) {
-      throw new Error("Invalid user ID.");
+    if (
+      typeof payload !== "object" ||
+      typeof payload.sub !== "string" ||
+      !/^[1-9]\d*$/.test(payload.sub) ||
+      !Number.isSafeInteger(Number(payload.sub)) ||
+      !Number.isSafeInteger(payload.version) ||
+      payload.version < 0
+    ) {
+      throw new Error("Invalid token.");
     }
   } catch {
     return res.status(401).json({
@@ -44,10 +57,9 @@ export async function requireAuth(req, res, next) {
   }
 
   try {
-    // Read current permissions on every request.
     const users = await pool.query(
       `SELECT u.id, u.full_name, u.username, u.role,
-              u.status, u.counter_id,
+              u.status, u.counter_id, u.token_version,
               c.name AS counter_name,
               c.is_active AS counter_active
        FROM users u
@@ -58,7 +70,19 @@ export async function requireAuth(req, res, next) {
 
     const user = users[0];
 
-    if (!user || user.status !== "active") {
+    if (!user) {
+      return res.status(401).json({
+        message: "Your account is unavailable. Please sign in again.",
+      });
+    }
+
+    if (Number(user.token_version) !== payload.version) {
+      return res.status(401).json({
+        message: "Your session has ended. Please sign in again.",
+      });
+    }
+
+    if (user.status !== "active") {
       return res.status(403).json({
         message: "Your account is pending approval or disabled.",
       });

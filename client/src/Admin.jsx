@@ -1,5 +1,6 @@
 import CounterServices from "./CounterServices";
 import { useEffect, useRef, useState } from "react";
+import PasswordForm from "./PasswordForm";
 
 const API = "/api";
 
@@ -11,6 +12,7 @@ export default function Admin({ session, onLogout }) {
     const [busy, setBusy] = useState(false);
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
+    const [resetTeller, setResetTeller] = useState(null);
 
     const saving = useRef(false);
 
@@ -230,6 +232,14 @@ export default function Admin({ session, onLogout }) {
                                             >
                                                 Disable
                                             </button>
+                                            <button
+                                                type="button"
+                                                className="secondary-button"
+                                                disabled={busy}
+                                                onClick={() => setResetTeller(user)}
+                                                >
+                                                Reset password
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -238,7 +248,26 @@ export default function Admin({ session, onLogout }) {
                     </table>
                 </div>
             )}
-            <CounterServices session={session} onLogout={onLogout} />
+                            {resetTeller && (
+                    <PasswordForm
+                        key={resetTeller.id}
+                        session={session}
+                        onLogout={onLogout}
+                        teller={resetTeller}
+                        disabled={busy}
+                        onBusyChange={setBusy}
+                        onCancel={() => setResetTeller(null)}
+                    />
+                    )}
+
+                    <PasswordForm
+                    session={session}
+                    onLogout={onLogout}
+                    disabled={busy}
+                    onBusyChange={setBusy}
+                    />
+
+                    <CounterServices session={session} onLogout={onLogout} />
         </main>
     );
 }

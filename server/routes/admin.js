@@ -134,12 +134,13 @@ router.put("/tellers/:id/disable", async (req, res) => {
       });
     }
 
-    await pool.query(
-      `UPDATE users
-       SET status = 'disabled'
-       WHERE id = ? AND role = 'teller'`,
-      [userId]
-    );
+   await pool.query(
+  `UPDATE users
+   SET status = 'disabled',
+       token_version = token_version + 1
+   WHERE id = ? AND role = 'teller'`,
+  [userId]
+);
 
     res.json({
       success: true,
