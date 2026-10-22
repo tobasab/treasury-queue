@@ -1,0 +1,376 @@
+.teller-workspace {
+  --tw-ink: #183247;
+  --tw-muted: #65788a;
+  --tw-border: #e0e8ef;
+  --tw-teal: #14786f;
+
+  box-sizing: border-box;
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 40px 0 64px;
+  color: var(--tw-ink);
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+  text-align: left;
+}
+
+.teller-workspace *,
+.teller-workspace *::before,
+.teller-workspace *::after {
+  box-sizing: border-box;
+}
+
+.teller-workspace .tw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.teller-workspace .tw-eyebrow {
+  margin: 0 0 8px;
+  color: var(--tw-teal);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.teller-workspace h1 {
+  margin: 0;
+  font-size: clamp(28px, 3vw, 38px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.teller-workspace .tw-subtitle {
+  margin: 10px 0 0;
+  color: var(--tw-muted);
+  font-size: 14px;
+}
+
+.teller-workspace .tw-account {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.teller-workspace .tw-account strong,
+.teller-workspace .tw-account span {
+  display: block;
+}
+
+.teller-workspace .tw-account strong {
+  font-size: 14px;
+}
+
+.teller-workspace .tw-account span {
+  margin-top: 3px;
+  color: var(--tw-muted);
+  font-size: 12px;
+}
+
+.teller-workspace .tw-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  align-items: start;
+  gap: 24px;
+}
+
+.teller-workspace .tw-serving-card,
+.teller-workspace .tw-actions-card {
+  overflow: hidden;
+  border: 1px solid var(--tw-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgb(24 50 71 / 4%);
+}
+
+.teller-workspace .tw-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 26px;
+  border-bottom: 1px solid var(--tw-border);
+}
+
+.teller-workspace h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.teller-workspace .tw-status {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #f0f3f6;
+  color: var(--tw-muted);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.teller-workspace .tw-status-active {
+  background: #e8f5ef;
+  color: #176b49;
+}
+
+.teller-workspace .tw-ticket-area {
+  display: flex;
+  min-height: 360px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.teller-workspace .tw-ticket-label {
+  margin: 0 0 12px;
+  color: var(--tw-muted);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.18em;
+}
+
+.teller-workspace .tw-ticket-number {
+  display: block;
+  max-width: 100%;
+  color: var(--tw-teal);
+  font-size: clamp(42px, 6vw, 80px);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.teller-workspace .tw-service-name {
+  margin: 16px 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.teller-workspace .tw-counter-label {
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: #f1f5f8;
+  color: var(--tw-muted);
+  font-size: 13px;
+}
+
+.teller-workspace .tw-empty {
+  max-width: 390px;
+}
+
+.teller-workspace .tw-empty-symbol {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 24px;
+  border-radius: 22px;
+  background: #e9f5f2;
+  color: var(--tw-teal);
+  font-size: 32px;
+}
+
+.teller-workspace .tw-empty h3 {
+  margin: 0 0 12px;
+  font-size: 25px;
+  line-height: 1.3;
+}
+
+.teller-workspace .tw-empty p {
+  margin: 0;
+  color: var(--tw-muted);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.teller-workspace .tw-card-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 17px 26px;
+  border-top: 1px solid var(--tw-border);
+  background: #f8fafc;
+  font-size: 12px;
+}
+
+.teller-workspace .tw-card-footer span {
+  color: var(--tw-muted);
+}
+
+.teller-workspace .tw-actions-card {
+  padding: 26px;
+}
+
+.teller-workspace .tw-actions-description {
+  margin: 7px 0 24px;
+  color: var(--tw-muted);
+  font-size: 13px;
+}
+
+.teller-workspace .tw-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 11px 16px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.teller-workspace .tw-action-button {
+  width: 100%;
+  min-height: 54px;
+  margin-bottom: 12px;
+}
+
+.teller-workspace .tw-button-primary {
+  background: var(--tw-teal);
+  color: #fff;
+}
+
+.teller-workspace .tw-button-primary:hover:not(:disabled) {
+  background: #0e625b;
+}
+
+.teller-workspace .tw-button-complete {
+  border-color: #b9dfcf;
+  background: #e8f5ee;
+  color: #176b49;
+}
+
+.teller-workspace .tw-button-complete:hover:not(:disabled) {
+  background: #d7eddf;
+}
+
+.teller-workspace .tw-button-secondary {
+  border-color: var(--tw-border);
+  background: #fff;
+  color: var(--tw-ink);
+}
+
+.teller-workspace .tw-button-secondary:hover:not(:disabled) {
+  background: #f1f5f8;
+}
+
+.teller-workspace .tw-button-skip {
+  border-color: #f0dcb4;
+  background: #fff7e9;
+  color: #8e621b;
+}
+
+.teller-workspace .tw-button-skip:hover:not(:disabled) {
+  background: #ffedca;
+}
+
+.teller-workspace .tw-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.teller-workspace .tw-button:focus-visible {
+  outline: 3px solid #7bd1c6;
+  outline-offset: 3px;
+}
+
+.teller-workspace .tw-action-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.teller-workspace .tw-help {
+  margin: 18px 0 24px;
+  color: var(--tw-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.teller-workspace .tw-refresh {
+  padding-top: 20px;
+  border-top: 1px solid var(--tw-border);
+}
+
+.teller-workspace .tw-refresh .tw-button {
+  width: 100%;
+}
+
+.teller-workspace .tw-refresh small {
+  display: block;
+  margin-top: 10px;
+  color: var(--tw-muted);
+  font-size: 11px;
+  text-align: center;
+}
+
+.teller-workspace .tw-notice {
+  margin-bottom: 20px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.teller-workspace .tw-notice-error {
+  background: #fff0f0;
+  color: #a02e2e;
+}
+
+.teller-workspace .tw-notice-success {
+  background: #e8f6ef;
+  color: #176b49;
+}
+
+@media (max-width: 900px) {
+  .teller-workspace .tw-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .teller-workspace .tw-account {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .teller-workspace .tw-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .teller-workspace .tw-ticket-area {
+    min-height: 280px;
+  }
+}
+
+@media (max-width: 540px) {
+  .teller-workspace {
+    width: calc(100% - 24px);
+    padding-top: 24px;
+  }
+
+  .teller-workspace .tw-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .teller-workspace .tw-card-footer {
+    flex-direction: column;
+    gap: 4px;
+    padding: 16px 20px;
+  }
+
+  .teller-workspace .tw-actions-card {
+    padding: 20px;
+  }
+}
