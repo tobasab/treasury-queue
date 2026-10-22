@@ -609,3 +609,136 @@ button:disabled {
 .password-form input:disabled {
   background: #f1f5f9;
 }
+.public-display .service-waiting-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 22px;
+  margin-top: 18px;
+}
+
+.public-display .service-waiting-column {
+  --service-color: #14786f;
+  --service-background: #e9f5f2;
+
+  overflow: hidden;
+  min-width: 0;
+  border: 1px solid #dfe7ee;
+  border-top: 5px solid var(--service-color);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 5px 20px rgb(24 50 71 / 4%);
+}
+
+.public-display .service-waiting-rpt {
+  --service-color: #2861a1;
+  --service-background: #edf3fc;
+}
+
+.public-display .service-waiting-cert {
+  --service-color: #8055a6;
+  --service-background: #f5effa;
+}
+
+.public-display .service-waiting-heading {
+  display: block;
+  padding: 22px;
+  border-bottom: 1px solid #e5ebf0;
+  background: var(--service-background);
+  text-align: center;
+}
+
+.public-display .service-waiting-prefix {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: var(--service-color);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+}
+
+.public-display .service-waiting-heading h3 {
+  margin: 0;
+  color: #183247;
+  font-size: clamp(18px, 1.6vw, 24px);
+  line-height: 1.3;
+}
+
+.public-display .service-waiting-heading p {
+  margin: 8px 0 0;
+  color: #607386;
+  font-size: 13px;
+}
+
+.public-display .service-waiting-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 18px;
+  list-style: none;
+}
+
+.public-display .service-waiting-ticket {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 18px;
+  border: 1px solid #e4ebf1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.public-display .service-waiting-ticket strong {
+  color: #183247;
+  font-size: clamp(23px, 2vw, 32px);
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.public-display .service-waiting-ticket span {
+  color: #607386;
+  font-size: 12px;
+}
+
+.public-display .service-waiting-ticket:first-child {
+  border-color: var(--service-color);
+  background: var(--service-background);
+}
+
+.public-display .service-waiting-ticket:first-child strong {
+  color: var(--service-color);
+}
+
+.public-display .service-waiting-empty {
+  margin: 0;
+  padding: 38px 20px;
+  color: #607386;
+  font-size: 14px;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .public-display .service-waiting-columns {
+    gap: 12px;
+  }
+
+  .public-display .service-waiting-list {
+    padding: 12px;
+  }
+
+  .public-display .service-waiting-ticket {
+    flex-direction: column;
+    gap: 6px;
+    padding: 15px 10px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .public-display .service-waiting-columns {
+    grid-template-columns: 1fr;
+  }
+}
