@@ -3,11 +3,13 @@ import pool from "../db.js";
 import { requireAuth } from "../middleware/auth.js";
 
 const router = Router();
+
 router.use(requireAuth);
 
 const todaySQL =
   "DATE(CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00'))";
 
+// Validate the counter and the user's assignment.
 router.param("counterId", (req, res, next, value) => {
   const counterId = Number(value);
 
@@ -32,7 +34,7 @@ router.param("counterId", (req, res, next, value) => {
   next();
 });
 
-// Get the ticket currently assigned to this counter.
+// Get today's ticket currently assigned to this counter.
 router.get("/:counterId/current", async (req, res) => {
   try {
     const rows = await pool.query(
@@ -42,14 +44,16 @@ router.get("/:counterId/current", async (req, res) => {
        JOIN services s ON s.id = t.service_id
        WHERE t.counter_id = ?
          AND t.status = 'serving'
+         AND t.queue_date = ${todaySQL}
        ORDER BY t.id
        LIMIT 1`,
       [req.counterId]
     );
 
+    res.set("Cache-Control", "no-store");
     res.json({ ticket: rows[0] || null });
   } catch (error) {
-    console.error("Current ticket error:", error.code);
+    console.error("Current ticket error:", error.code || error.message);
 
     res.status(500).json({
       message: "Unable to load the current ticket.",
@@ -57,18 +61,20 @@ router.get("/:counterId/current", async (req, res) => {
   }
 });
 
-// Call the oldest eligible waiting ticket.
+// Call today's oldest eligible waiting ticket.
 router.post("/:counterId/next", async (req, res) => {
   let connection;
+  let transactionOpen = false;
 
   try {
     connection = await pool.getConnection();
     await connection.beginTransaction();
+    transactionOpen = true;
 
-    // Serialize actions for this counter.
+    // Serialize Call Next requests for this counter.
     const counters = await connection.query(
       `SELECT id, counter_number
-        FROM counters
+       FROM counters
        WHERE id = ? AND is_active = TRUE
        FOR UPDATE`,
       [req.counterId]
@@ -76,12 +82,14 @@ router.post("/:counterId/next", async (req, res) => {
 
     if (!counters.length) {
       await connection.rollback();
+      transactionOpen = false;
 
       return res.status(404).json({
         message: "Counter not found or inactive.",
       });
     }
 
+    // Repeated clicks return today's active ticket.
     const current = await connection.query(
       `SELECT t.id, t.ticket_number, t.status,
               s.name AS service_name
@@ -89,14 +97,16 @@ router.post("/:counterId/next", async (req, res) => {
        JOIN services s ON s.id = t.service_id
        WHERE t.counter_id = ?
          AND t.status = 'serving'
+         AND t.queue_date = ${todaySQL}
+       ORDER BY t.id
        LIMIT 1
        FOR UPDATE`,
       [req.counterId]
     );
 
-    // Repeated clicks return the active ticket.
     if (current.length) {
       await connection.commit();
+      transactionOpen = false;
 
       return res.json({ ticket: current[0] });
     }
@@ -120,10 +130,11 @@ router.post("/:counterId/next", async (req, res) => {
 
     if (!waiting.length) {
       await connection.commit();
+      transactionOpen = false;
 
       return res.json({
         ticket: null,
-        message: "No waiting tickets for this counter.",
+        message: "No waiting tickets for this counter today.",
       });
     }
 
@@ -144,13 +155,16 @@ router.post("/:counterId/next", async (req, res) => {
     );
 
     await connection.commit();
-      req.app.get("io").emit("ticket:called", {
+    transactionOpen = false;
+
+    const io = req.app.get("io");
+
+    io.emit("ticket:called", {
       ticket_number: ticket.ticket_number,
       counter_number: counters[0].counter_number,
     });
 
-    req.app.get("io").emit("queue:changed");
-
+    io.emit("queue:changed");
 
     res.json({
       ticket: {
@@ -161,22 +175,31 @@ router.post("/:counterId/next", async (req, res) => {
       },
     });
   } catch (error) {
-    if (connection) await connection.rollback();
+    if (connection && transactionOpen) {
+      try {
+        await connection.rollback();
+      } catch (rollbackError) {
+        console.error(
+          "Call next rollback error:",
+          rollbackError.code || rollbackError.message
+        );
+      }
+    }
 
-    console.error("Call next error:", error.code);
+    console.error("Call next error:", error.code || error.message);
 
     res.status(500).json({
       message: "Unable to call the next ticket. Please retry.",
     });
   } finally {
-    if (connection) await connection.release();
+    if (connection) connection.release();
   }
 });
 
-// Complete or skip a specific active ticket.
+// Complete or skip a specific active ticket from today's queue.
 router.post("/:counterId/finish", async (req, res) => {
-  const ticketId = Number(req.body.ticket_id);
-  const action = req.body.action;
+  const ticketId = Number(req.body?.ticket_id);
+  const action = req.body?.action;
 
   if (
     !Number.isInteger(ticketId) ||
@@ -200,28 +223,31 @@ router.post("/:counterId/finish", async (req, res) => {
            END
        WHERE id = ?
          AND counter_id = ?
-         AND status = 'serving'`,
+         AND status = 'serving'
+         AND queue_date = ${todaySQL}`,
       [status, status, ticketId, req.counterId]
     );
 
     if (!result.affectedRows) {
       return res.status(409).json({
-        message: "This ticket is no longer active. Refresh the counter.",
+        message:
+          "This ticket is no longer active in today's queue. Refresh the counter.",
       });
     }
 
-        req.app.get("io").emit("queue:changed");
+    req.app.get("io").emit("queue:changed");
 
     res.json({ success: true });
   } catch (error) {
-    console.error("Finish ticket error:", error.code);
+    console.error("Finish ticket error:", error.code || error.message);
 
     res.status(500).json({
       message: "Unable to update the ticket.",
     });
   }
 });
-// Repeat the announcement for this counter's active ticket.
+
+// Repeat the announcement for today's active ticket.
 router.post("/:counterId/recall", async (req, res) => {
   const ticketId = Number(req.body?.ticket_id);
 
@@ -239,13 +265,15 @@ router.post("/:counterId/recall", async (req, res) => {
        WHERE t.id = ?
          AND t.counter_id = ?
          AND t.status = 'serving'
+         AND t.queue_date = ${todaySQL}
          AND c.is_active = TRUE`,
       [ticketId, req.counterId]
     );
 
     if (!tickets.length) {
       return res.status(409).json({
-        message: "This ticket is no longer active. Refresh your workspace.",
+        message:
+          "This ticket is no longer active in today's queue. Refresh your workspace.",
       });
     }
 
