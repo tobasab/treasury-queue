@@ -1,0 +1,8 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/.git
+**/*.log
+*.tar.gz
+server/create-admin.js

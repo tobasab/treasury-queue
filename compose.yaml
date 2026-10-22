@@ -1,0 +1,52 @@
+name: treasury-queue
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    restart: unless-stopped
+    init: true
+
+    ports:
+      - "192.168.200.24:8081:3000"
+
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      CLIENT_ORIGIN: http://192.168.200.24:8081
+
+      DB_HOST: treasury-queue-db-mariadb-1
+      DB_PORT: "3306"
+      DB_NAME: treasury_queue
+      DB_USER: treasury_app
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      TZ: Asia/Manila
+
+    networks:
+      - queue_database
+
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  queue_database:
+    external: true
+    name: treasury-queue-db_default

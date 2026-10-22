@@ -13,6 +13,9 @@ router.get("/", async (req, res) => {
        JOIN counters c ON c.id = t.counter_id
        JOIN services s ON s.id = t.service_id
        WHERE t.status = 'serving'
+      AND t.queue_date = DATE(
+        CONVERT_TZ(UTC_TIMESTAMP(), '+00:00', '+08:00')
+      )
        ORDER BY c.counter_number`
     );
 
